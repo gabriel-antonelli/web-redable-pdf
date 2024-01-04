@@ -11,6 +11,16 @@ Generate web-readable PDFs from multiple web pages using Go.
 - Combine multiple HTML files into a single PDF.
 - Create separate PDFs for each web page.
 
+## Dependencies
+
+The main dependencies for `web-readable-pdf` are:
+
+- [go-wkhtmltopdf](https://github.com/SebastiaanKlippert/go-wkhtmltopdf) v1.9.2: A Go wrapper for the `wkhtmltopdf` command line tool, which is used for converting HTML to PDF.
+
+- [go-readability](https://github.com/go-shiori/go-readability) v0.0.0-20231029095239-6b97d5aba789: A library for extracting article content from HTML pages, used to improve the readability of the input HTML.
+
+- [cobra](https://github.com/spf13/cobra) v1.8.0: A popular Go library for creating powerful command-line applications.
+
 ## Installation
 
 Ensure that you have Go installed on your machine. Install `web-readable-pdf` using the following command:
