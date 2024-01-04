@@ -30,7 +30,7 @@ Specify one or more web pages and an output PDF file.`,
 )
 
 func main() {
-	rootCmd.Flags().StringVarP(&outputPDF, "output", "o", "output.pdf", "Specify the output PDF file")
+	rootCmd.Flags().StringVarP(&outputPDF, "output", "o", "output", "Specify the output PDF file")
 	rootCmd.Flags().BoolVarP(&createSeparate, "separate", "s", false, "Create separate PDFs for each page")
 	rootCmd.Flags().BoolP("help", "h", false, "Help for web-readable-pdf")
 
