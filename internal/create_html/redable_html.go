@@ -34,7 +34,7 @@ func GenerateRedableHtml(args []string) string {
 </body>
 </html>`, article.Content)
 
-		dstHTMLFile, err := os.Create(fmt.Sprintf("%s/%d.html", tempDir, num))
+		dstHTMLFile, err := os.Create(fmt.Sprintf("%s/%s.html", tempDir, article.Title))
 		if err != nil {
 			log.Fatalf("Error creating HTML file: %s", err)
 		}
