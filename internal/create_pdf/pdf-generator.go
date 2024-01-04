@@ -20,7 +20,10 @@ func CreateCombinedPDF(tempDir, output string) error {
 		log.Fatal(err)
 	}
 
-	output = combinedOutput
+	if output == "ARTICLENAME" {
+		output = combinedOutput
+	}
+
 	err = generatePDFFromBuffer(buffer, output, "")
 	if err != nil {
 		log.Fatal(err)
@@ -37,7 +40,7 @@ func CreateSeparatedPDFFiles(tempDir, output string) {
 		log.Fatalf("failed to read directory: %v", err)
 	}
 
-	for _, file := range tempDirRead {
+	for num, file := range tempDirRead {
 		log.Printf("Reading file: %s/%s", tempDir, file.Name())
 		readFile, err := os.ReadFile(filepath.Join(tempDir, file.Name()))
 		if err != nil {
@@ -45,7 +48,14 @@ func CreateSeparatedPDFFiles(tempDir, output string) {
 		}
 		buffer := new(bytes.Buffer)
 		buffer.Write(readFile)
-		generatePDFFromBuffer(buffer, output, file.Name())
+
+		userOutput := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
+
+		if output != "ARTICLENAME" {
+			userOutput = fmt.Sprintf("%d-%s", num+1, output)
+		}
+
+		generatePDFFromBuffer(buffer, userOutput, file.Name())
 	}
 }
 

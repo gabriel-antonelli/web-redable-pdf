@@ -16,7 +16,7 @@ func GenerateRedableHtml(args []string) string {
 	}
 
 	for num, webPage := range args {
-		log.Printf("Finding text for article number %d in link: %s", num, webPage)
+		log.Printf("Finding text for article number %d in link: %s", num+1, webPage)
 
 		article, err := readability.FromURL(webPage, 30*time.Second)
 		if err != nil {
@@ -34,7 +34,7 @@ func GenerateRedableHtml(args []string) string {
 </body>
 </html>`, article.Content)
 
-		dstHTMLFile, err := os.Create(fmt.Sprintf("%s/%s.html", tempDir, article.Title))
+		dstHTMLFile, err := os.Create(fmt.Sprintf("%s/%d---%s.html", tempDir, num+1, article.Title))
 		if err != nil {
 			log.Fatalf("Error creating HTML file: %s", err)
 		}
