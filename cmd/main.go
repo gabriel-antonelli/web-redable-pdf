@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/gabriel-antonelli/web-redable-pdf/internal/create_html"
@@ -19,7 +20,11 @@ var (
 Specify one or more web pages and an output PDF file.`,
 		Args: cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			tempDir := createhtml.GenerateRedableHtml(args)
+			readabilitySvc := &createhtml.RealReadabilityService{}
+			tempDir, err := createhtml.GenerateReadableHtml(args, readabilitySvc)
+			if err != nil {
+				log.Fatalf("Error while generating HTML: %v", err)
+			}
 			if createSeparate {
 				createpdf.CreateSeparatedPDFFiles(tempDir, outputPDF)
 			} else {

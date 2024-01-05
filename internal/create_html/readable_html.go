@@ -6,21 +6,25 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-shiori/go-readability"
+	readability "github.com/go-shiori/go-readability"
 )
 
-func GenerateRedableHtml(args []string) string {
+type ReadabilityService interface {
+	FromURL(url string, timeout time.Duration) (readability.Article, error)
+}
+
+func GenerateReadableHtml(args []string, readabilityService ReadabilityService) (string, error) {
 	tempDir, err := os.MkdirTemp("", "redable-html")
 	if err != nil {
-		log.Fatalf("Error creating temp directory: %s", err)
+		return "", err
 	}
 
 	for num, webPage := range args {
 		log.Printf("Finding text for article number %d in link: %s", num+1, webPage)
 
-		article, err := readability.FromURL(webPage, 30*time.Second)
+		article, err := readabilityService.FromURL(webPage, 30*time.Second)
 		if err != nil {
-			log.Fatalf("failed to parse %s, %v\n", webPage, err)
+			return "", err
 		}
 
 		// Add <meta charset="utf-8"> to the content
@@ -36,12 +40,12 @@ func GenerateRedableHtml(args []string) string {
 
 		dstHTMLFile, err := os.Create(fmt.Sprintf("%s/%d---%s.html", tempDir, num+1, article.Title))
 		if err != nil {
-			log.Fatalf("Error creating HTML file: %s", err)
+			return "", err
 		}
 		defer dstHTMLFile.Close()
 
 		dstHTMLFile.WriteString(article.Content)
 	}
 
-	return tempDir
+	return tempDir, nil
 }
