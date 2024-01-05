@@ -31,9 +31,9 @@ go get -u github.com/your-username/web-readable-pdf
 ## Usage
 
 ### Basic Usage
-
+```
 web-readable-pdf [web-page1] [web-page2] [web-page3] [output.pdf]
-
+```
 ### Options
 
 - `-o, --output`: Specify the output PDF file. (Default: article title)
@@ -42,13 +42,13 @@ web-readable-pdf [web-page1] [web-page2] [web-page3] [output.pdf]
 ### Examples
 
 1. Combine multiple web pages into a single PDF:
-
+```
 web-readable-pdf https://example.com/page1 https://example.com/page2 
-
+```
 2. Create separate PDFs for each web page:
-
+```
 web-readable-pdf -s https://example.com/page1 https://example.com/page2
-
+```
 ## Contributing
 
 Contributions are welcome! Please follow our [contribution guidelines](CONTRIBUTING.md).
