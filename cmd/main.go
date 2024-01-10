@@ -26,9 +26,9 @@ Specify one or more web pages and an output PDF file.`,
 				log.Fatalf("Error while generating HTML: %v", err)
 			}
 			if createSeparate {
-				createpdf.CreateSeparatedPDFFiles(tempDir, outputPDF)
+				createpdf.CreateSeparatedPDFFiles(tempDir, outputPDF, &createpdf.RealFileSystem{}, createpdf.PDFFromBufferImpl{})
 			} else {
-				createpdf.CreateCombinedPDF(tempDir, outputPDF)
+				createpdf.CreateCombinedPDF(tempDir, outputPDF, createpdf.PDFFromBufferImpl{})
 			}
 		},
 	}

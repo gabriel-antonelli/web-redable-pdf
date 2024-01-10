@@ -1,0 +1,320 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>create_html: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/gabriel-antonelli/web-redable-pdf/internal/create_html/readable_html.go (86.7%)</option>
+				
+				<option value="file1">github.com/gabriel-antonelli/web-redable-pdf/internal/create_html/readiability_factory.go (0.0%)</option>
+				
+				<option value="file2">github.com/gabriel-antonelli/web-redable-pdf/internal/create_pdf/pdf_from_buffer.go (0.0%)</option>
+				
+				<option value="file3">github.com/gabriel-antonelli/web-redable-pdf/internal/create_pdf/pdf_generator.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package createhtml
+
+import (
+        "fmt"
+        "log"
+        "os"
+        "time"
+
+        readability "github.com/go-shiori/go-readability"
+)
+
+type ReadabilityService interface {
+        FromURL(url string, timeout time.Duration) (readability.Article, error)
+}
+
+func GenerateReadableHtml(args []string, readabilityService ReadabilityService) (string, error) <span class="cov8" title="1">{
+        tempDir, err := os.MkdirTemp("", "redable-html")
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">for num, webPage := range args </span><span class="cov8" title="1">{
+                log.Printf("Finding text for article number %d in link: %s", num+1, webPage)
+
+                article, err := readabilityService.FromURL(webPage, 30*time.Second)
+                if err != nil </span><span class="cov8" title="1">{
+                        return "", err
+                }</span>
+
+                // Add &lt;meta charset="utf-8"&gt; to the content
+                <span class="cov8" title="1">article.Content = fmt.Sprintf(`&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+%s
+&lt;/body&gt;
+&lt;/html&gt;`, article.Content)
+
+                dstHTMLFile, err := os.Create(fmt.Sprintf("%s/%d---%s.html", tempDir, num+1, article.Title))
+                if err != nil </span><span class="cov0" title="0">{
+                        return "", err
+                }</span>
+                <span class="cov8" title="1">defer dstHTMLFile.Close()
+
+                dstHTMLFile.WriteString(article.Content)</span>
+        }
+
+        <span class="cov8" title="1">return tempDir, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package createhtml
+
+import (
+        "time"
+
+        readability "github.com/go-shiori/go-readability"
+)
+
+type RealReadabilityService struct{}
+
+func (r *RealReadabilityService) FromURL(url string, timeout time.Duration) (readability.Article, error) <span class="cov0" title="0">{
+        return readability.FromURL(url, timeout)
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package createpdf
+
+import (
+        "bytes"
+        "fmt"
+        "io"
+        "log"
+        "os"
+        "path/filepath"
+        "strings"
+
+        "github.com/SebastiaanKlippert/go-wkhtmltopdf"
+)
+
+type PDFFromBuffer interface {
+        combineHTMLFilesToBuffer(tempDir string) (*bytes.Buffer, string, error)
+        generatePDFFromBuffer(buffer io.Reader, output, filename string) error
+}
+
+type PDFFromBufferImpl struct{}
+
+func (PDFFromBufferImpl) combineHTMLFilesToBuffer(tempDir string) (*bytes.Buffer, string, error) <span class="cov0" title="0">{
+
+        tempDirRead, err := os.ReadDir(tempDir)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, "output", fmt.Errorf("failed to read directory: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">var output strings.Builder
+        buffer := new(bytes.Buffer)
+
+        for i, file := range tempDirRead </span><span class="cov0" title="0">{
+                log.Printf("Reading file: %s/%s", tempDir, file.Name())
+                readFile, err := os.ReadFile(filepath.Join(tempDir, file.Name()))
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, output.String(), fmt.Errorf("failed to read file %s: %v", file.Name(), err)
+                }</span>
+                <span class="cov0" title="0">buffer.Write(readFile)
+
+                if i &gt; 0 </span><span class="cov0" title="0">{
+                        output.WriteRune('-')
+                }</span>
+                <span class="cov0" title="0">output.WriteString(strings.TrimSuffix(file.Name(), filepath.Ext(file.Name())))</span>
+        }
+
+        <span class="cov0" title="0">return buffer, output.String(), nil</span>
+}
+
+func (PDFFromBufferImpl) generatePDFFromBuffer(buffer io.Reader, output, filename string) error <span class="cov0" title="0">{
+        pdfg, err := wkhtmltopdf.NewPDFGenerator()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create PDF generator: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">pdfg.AddPage(wkhtmltopdf.NewPageReader(buffer))
+
+        err = pdfg.Create()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create PDF: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">if output == "ARTICLENAME" </span><span class="cov0" title="0">{
+                output = strings.TrimSuffix(filename, filepath.Ext(filename))
+        }</span>
+
+        <span class="cov0" title="0">log.Printf("Creating %s.pdf", output)
+        err = pdfg.WriteFile(fmt.Sprintf("%s.pdf", output))
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to write PDF to file: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package createpdf
+
+import (
+        "bytes"
+        "fmt"
+        "log"
+        "os"
+        "path/filepath"
+        "strings"
+)
+
+type FileSystem interface {
+        ReadFile(filename string) ([]byte, error)
+}
+
+type RealFileSystem struct{}
+
+func (r *RealFileSystem) ReadFile(filename string) ([]byte, error) <span class="cov8" title="1">{
+        return os.ReadFile(filename)
+}</span>
+
+func CreateCombinedPDF(tempDir, output string, PDFFromBuffer PDFFromBuffer) error <span class="cov8" title="1">{
+        defer os.RemoveAll(tempDir)
+
+        buffer, combinedOutput, err := PDFFromBuffer.combineHTMLFilesToBuffer(tempDir)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if output == "ARTICLENAME" </span><span class="cov8" title="1">{
+                output = combinedOutput
+        }</span>
+
+        <span class="cov8" title="1">err = PDFFromBuffer.generatePDFFromBuffer(buffer, output, "")
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func CreateSeparatedPDFFiles(tempDir, output string, fs FileSystem, PDFFromBuffer PDFFromBuffer) error <span class="cov8" title="1">{
+        defer os.RemoveAll(tempDir)
+
+        tempDirRead, err := os.ReadDir(tempDir)
+        if err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("failed to read directory: %v", err)
+        }</span>
+
+        <span class="cov8" title="1">for num, file := range tempDirRead </span><span class="cov8" title="1">{
+                log.Printf("Reading file: %s/%s", tempDir, file.Name())
+                readFile, err := fs.ReadFile(filepath.Join(tempDir, file.Name()))
+                if err != nil </span><span class="cov8" title="1">{
+                        return fmt.Errorf("failed to read file %s: %v", file.Name(), err)
+                }</span>
+                <span class="cov8" title="1">buffer := new(bytes.Buffer)
+                buffer.Write(readFile)
+
+                userOutput := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
+
+                if output != "ARTICLENAME" </span><span class="cov8" title="1">{
+                        userOutput = fmt.Sprintf("%d-%s", num+1, output)
+                }</span>
+
+                <span class="cov8" title="1">PDFFromBuffer.generatePDFFromBuffer(buffer, userOutput, file.Name())</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
